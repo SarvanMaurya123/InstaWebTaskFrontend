@@ -83,10 +83,10 @@ api.interceptors.response.use(
        * Refresh token (cookie-based)
        */
       await axios.post(
-        `${process.env.NEXT_PUBLIC_API_URL}/auth/refresh`,
-        {},
-        { withCredentials: true }
-      );
+  `${process.env.NEXT_PUBLIC_API_URL}/auth/refresh-token`,
+  {},
+  { withCredentials: true }
+);
 
       processQueue(null);
 
