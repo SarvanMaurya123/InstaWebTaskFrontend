@@ -1,36 +1,94 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 📊 Lead Management CRM
 
-## Getting Started
+A full-stack **Lead Management CRM system** built for small businesses to manage customers, track leads, and improve sales workflow.  
+The system includes **authentication, lead tracking, and status management** with a clean dashboard UI.
 
-First, run the development server:
+---
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## 🚀 Features
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 🔐 Authentication System
+- User registration & login
+- Secure JWT-based authentication
+- HTTP-only cookie session handling
+- Protected routes (dashboard access only after login)
+- Logout with token invalidation
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 👥 Lead Management System
+- Create new leads/customers
+- View all leads in dashboard
+- Update lead details
+- Delete leads
+- Change lead status:
+  -  New
+  -  Contacted
+  -  Qualified
+  - Converted
+  - Lost
 
-## Learn More
+---
 
-To learn more about Next.js, take a look at the following resources:
+### 🔎 Search & Filter
+- Search leads by:
+  - Name
+  - Email
+  - Company
+- Fast filtering for better usability
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+---
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### 📊 Dashboard
+- Clean and responsive UI
+- Lead statistics overview
+- Status-based organization
+- Quick actions (edit, delete, update status)
 
-## Deploy on Vercel
+---
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 🛠 Tech Stack
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Frontend
+- Next.js / React.js
+- TypeScript
+- Tailwind CSS
+- React Query (TanStack Query)
+
+### Backend
+- Node.js
+- Express.js
+- TypeScript
+- MongoDB + Mongoose
+- JWT Authentication
+- Cookie-based session handling
+
+---
+
+## APIs Auth
+- POST /api/v1/auth/register
+- POST /api/v1/auth/login
+- POST /api/v1/auth/logout
+- GET /api/v1/auth/me
+- POST /api/v1/auth/refresh-token
+
+## APIs leads
+
+- GET /api/v1/leads/get
+- POST /api/v1/leads/create
+- DELETE /api/v1/leads/:id
+- PUT /api/v1/leads/:id
+- GET /api/v1/leads/search?q=google
+- GET /api/v1/leads/stats
+
+
+---
+
+## 🔒 Security 
+- Password hashing (bcrypt)
+- HTTP-only cookies
+- JWT expiration handling
+- Protected API routes
+- Refresh token strategy 
+
+---
