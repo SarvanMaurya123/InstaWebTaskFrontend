@@ -19,10 +19,9 @@ export default function Login() {
     e.preventDefault();
 
    mutate(form, {
-  onSuccess: () => {
-    console.log("Redirecting...");
-    router.push("/dashboard");
-  },
+      onSuccess: () => {
+        router.push("/dashboard");
+      },
 });
   };
 
