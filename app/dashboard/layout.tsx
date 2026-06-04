@@ -1,6 +1,6 @@
 'use client';
 
-import { ReactNode, useState } from 'react';
+import { ReactNode, useEffect, useState } from 'react';
 import Link from 'next/link';
 import {
   LayoutDashboard,
@@ -11,10 +11,29 @@ import {
   Upload,
 } from 'lucide-react';
 import { useLogout } from '@/hooks/auth/useLogout';
+import { useRouter } from 'next/navigation';
+import { useMe } from '@/hooks/auth/useMe';
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(true);
   const { mutate, isPending } = useLogout();
+
+  const router = useRouter();
+  const { data: user, isLoading } = useMe();
+
+  useEffect(() => {
+    if (!isLoading && !user) {
+      router.push('/login');
+    }
+  }, [user, isLoading, router]);
+
+  if (isLoading || !user) {
+    return (
+      <div className="h-screen flex items-center justify-center">
+        Loading...
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex bg-gray-100">
@@ -48,6 +67,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
             <LayoutDashboard size={20} />
             {open && <span>Dashboard</span>}
           </Link>
+
           <Link
             href="/dashboard/addleads"
             className="flex items-center gap-3 px-3 py-2 rounded hover:bg-orange-50 text-gray-700"
@@ -64,24 +84,21 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
             {open && <span>Leads</span>}
           </Link>
 
-         
-
         </nav>
 
         {/* Bottom logout */}
         <div className="p-3 border-t text-sm text-gray-500">
           <button
-      onClick={() => mutate()}
-      className="px-3 py-2 text-red-600 hover:bg-red-50 rounded w-full text-left"
-    >
-      {isPending ? "Logging out..." : "Logout"}
-    </button>
+            onClick={() => mutate()}
+            className="px-3 py-2 text-red-600 hover:bg-red-50 rounded w-full text-left"
+          >
+            {isPending ? "Logging out..." : "Logout"}
+          </button>
         </div>
       </aside>
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col">
-           
         <main className="flex-1 p-6">
           {children}
         </main>
