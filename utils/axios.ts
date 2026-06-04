@@ -1,18 +1,19 @@
-import axios, { InternalAxiosRequestConfig } from "axios";
+import axios from "axios";
 
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL,
-  withCredentials: true,
+  withCredentials: true, // 🔥 REQUIRED for cookie auth
 });
 
 /**
  * -----------------------
  * REQUEST INTERCEPTOR
  * -----------------------
- * (optional - kept clean for future use)
+ * Keep minimal (avoid breaking cookies)
  */
 api.interceptors.request.use(
-  (config: InternalAxiosRequestConfig) => {
+  (config) => {
+    // DO NOT overwrite headers
     if (!config.headers) {
       config.headers = {} as any;
     }
@@ -24,7 +25,7 @@ api.interceptors.request.use(
 
 /**
  * -----------------------
- * REFRESH HANDLING STATE
+ * REFRESH STATE CONTROL
  * -----------------------
  */
 let isRefreshing = false;
@@ -58,21 +59,15 @@ api.interceptors.response.use(
     }
 
     const status = error.response?.status;
-    const code = error.response?.data?.code;
 
-    /**
-     * Only handle token expiry case
-     */
-    const isTokenExpired =
-      status === 401 && code === "TOKEN_EXPIRED";
+    // 🔥 IMPORTANT: handle ALL 401 errors
+    const isAuthError = status === 401;
 
-    if (!isTokenExpired) {
+    if (!isAuthError) {
       return Promise.reject(error);
     }
 
-    /**
-     * Prevent infinite retry loop
-     */
+    // prevent infinite retry loop
     if (originalRequest._retry) {
       return Promise.reject(error);
     }
@@ -80,7 +75,7 @@ api.interceptors.response.use(
     originalRequest._retry = true;
 
     /**
-     * Queue requests while refresh is happening
+     * If refresh already running → queue request
      */
     if (isRefreshing) {
       return new Promise((resolve, reject) => {
@@ -92,20 +87,22 @@ api.interceptors.response.use(
 
     try {
       /**
-       * Refresh token (cookie-based)
-       * Backend should set new cookies here
+       * 🔥 Refresh token request (bypass interceptor risk)
        */
-      await api.post("/auth/refresh-token");
+      await axios.post(
+        `${process.env.NEXT_PUBLIC_API_URL}/auth/refresh-token`,
+        {},
+        { withCredentials: true }
+      );
 
       processQueue(null);
 
+      // retry original request
       return api(originalRequest);
     } catch (err) {
       processQueue(err);
 
-      /**
-       * If refresh fails → force logout
-       */
+      // logout fallback
       if (typeof window !== "undefined") {
         window.location.href = "/login";
       }
