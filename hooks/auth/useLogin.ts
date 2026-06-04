@@ -12,17 +12,10 @@ export const useLogin = () => {
     onSuccess: async (res) => {
       console.log("Login Success:", res.data);
 
-      /**
-       * IMPORTANT:
-       * Cookies are already set by backend
-       * No token storage needed
-       */
-
-      // refresh all protected queries
-      await queryClient.invalidateQueries();
-
-      // optional: redirect handled in UI layer
-      // router.push("/dashboard");
+      // Only refetch current user data
+      await queryClient.refetchQueries({
+        queryKey: ["me"],
+      });
     },
 
     onError: (error: any) => {
