@@ -16,14 +16,17 @@ export default function Login() {
   });
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  e.preventDefault();
 
-   mutate(form, {
-      onSuccess: () => {
-        router.push("/dashboard");
-      },
-});
-  };
+  mutate(form, {
+    onSuccess: () => {
+      // small delay helps in production hydration + cookie sync
+      setTimeout(() => {
+        router.replace("/dashboard");
+      }, 100);
+    },
+  });
+};
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-white to-orange-50">
