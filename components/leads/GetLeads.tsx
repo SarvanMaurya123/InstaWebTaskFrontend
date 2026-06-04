@@ -16,6 +16,7 @@ type Lead = {
   companyName?: string;
   status?: "NEW" | "CONTACTED" | "QUALIFIED" | "CONVERTED" | "LOST";
   notes?: string;
+  createdAt: string;
 };
 
 const STATUS_OPTIONS = ["NEW", "CONTACTED", "QUALIFIED", "CONVERTED", "LOST"] as const;
@@ -192,7 +193,12 @@ export default function GetLeads() {
                   </div>
                   <span className={`shrink-0 text-xs font-medium px-2.5 py-1 rounded-full ${style.badge}`}>
                     {STATUS_LABELS[lead.status || "NEW"]}
+
                   </span>
+                  {/* CREATED AT */}
+                 <span className="text-xs text-gray-400">
+                  {new Date(lead.createdAt).toISOString().split("T")[0]}
+                </span>
                 </div>
 
                 {/* CONTACT */}

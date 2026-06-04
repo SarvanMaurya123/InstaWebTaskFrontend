@@ -25,7 +25,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
   } = useMe();
 
   /**
-   * 🚨 AUTH GUARD (ONLY ONE RESPONSIBILITY)
+   * AUTH GUARD (ONLY ONE RESPONSIBILITY)
    */
   useEffect(() => {
     if (isLoading) return;
@@ -36,7 +36,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
   }, [user, isLoading, isError, router]);
 
   /**
-   * 🔥 BLOCK UI UNTIL AUTH IS RESOLVED
+   * BLOCK UI UNTIL AUTH IS RESOLVED
    */
   if (isLoading) {
     return (
