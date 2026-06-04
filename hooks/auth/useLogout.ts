@@ -3,7 +3,6 @@
 import { authService } from "@/services/auth/logout";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-// import your auth store if you have one
 
 export const useLogout = () => {
   const queryClient = useQueryClient();
@@ -13,13 +12,25 @@ export const useLogout = () => {
     mutationFn: () => authService.logout(),
 
     onSuccess: async () => {
-      // 1. clear backend session (cookie removed)
-      await queryClient.clear();
+      /**
+       * 1. Stop all active queries first
+       */
+      await queryClient.cancelQueries();
 
-      // 2. IMPORTANT: clear frontend auth state
-      // authStore.setState({ user: null }); // if using zustand/context
+      /**
+       * 2. Clear ALL cached auth state
+       */
+      queryClient.removeQueries({ queryKey: ["me"] });
+      queryClient.removeQueries({ queryKey: ["user"] });
 
-      // 3. redirect safely (no reload flicker)
+      /**
+       * 3. Full cache reset (safe after logout)
+       */
+      queryClient.clear();
+
+      /**
+       * 4. Force redirect
+       */
       router.replace("/login");
     },
 
