@@ -2,81 +2,47 @@ import axios from "axios";
 
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL,
-  withCredentials: true, // 🔥 REQUIRED for cookie auth
+  withCredentials: true,
 });
 
-/**
- * -----------------------
- * REQUEST INTERCEPTOR
- * -----------------------
- * Keep minimal (avoid breaking cookies)
- */
-api.interceptors.request.use(
-  (config) => {
-    // DO NOT overwrite headers
-    if (!config.headers) {
-      config.headers = {} as any;
-    }
-
-    return config;
-  },
-  (error) => Promise.reject(error)
-);
-
-/**
- * -----------------------
- * REFRESH STATE CONTROL
- * -----------------------
- */
 let isRefreshing = false;
-let failedQueue: {
-  resolve: (value?: any) => void;
-  reject: (error?: any) => void;
-}[] = [];
+let failedQueue: any[] = [];
 
 const processQueue = (error: any) => {
-  failedQueue.forEach((prom) => {
-    if (error) prom.reject(error);
-    else prom.resolve(true);
+  failedQueue.forEach((p) => {
+    error ? p.reject(error) : p.resolve(true);
   });
-
   failedQueue = [];
 };
 
-/**
- * -----------------------
- * RESPONSE INTERCEPTOR
- * -----------------------
- */
 api.interceptors.response.use(
   (response) => response,
 
   async (error) => {
     const originalRequest = error.config;
-
-    if (!originalRequest) {
-      return Promise.reject(error);
-    }
-
     const status = error.response?.status;
+    const url = originalRequest?.url;
 
-    // 🔥 IMPORTANT: handle ALL 401 errors
-    const isAuthError = status === 401;
-
-    if (!isAuthError) {
-      return Promise.reject(error);
-    }
-
-    // prevent infinite retry loop
-    if (originalRequest._retry) {
+    if (!originalRequest || originalRequest._retry) {
       return Promise.reject(error);
     }
 
     originalRequest._retry = true;
 
     /**
-     * If refresh already running → queue request
+     * ONLY refresh on specific endpoints failure
+     * NOT every 401 in system
      */
+    const shouldRefresh =
+      status === 401 &&
+      !url?.includes("/auth/login") &&
+      !url?.includes("/auth/signup") &&
+      !url?.includes("/auth/refresh-token");
+
+    if (!shouldRefresh) {
+      return Promise.reject(error);
+    }
+
     if (isRefreshing) {
       return new Promise((resolve, reject) => {
         failedQueue.push({ resolve, reject });
@@ -87,7 +53,8 @@ api.interceptors.response.use(
 
     try {
       /**
-       * 🔥 Refresh token request (bypass interceptor risk)
+       * Refresh WITHOUT relying on refresh cookie
+       * Backend should use DB session or access token decode
        */
       await axios.post(
         `${process.env.NEXT_PUBLIC_API_URL}/auth/refresh-token`,
@@ -97,12 +64,11 @@ api.interceptors.response.use(
 
       processQueue(null);
 
-      // retry original request
       return api(originalRequest);
     } catch (err) {
       processQueue(err);
 
-      // logout fallback
+      // HARD LOGOUT
       if (typeof window !== "undefined") {
         window.location.href = "/login";
       }
