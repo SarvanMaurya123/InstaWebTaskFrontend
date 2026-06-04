@@ -18,11 +18,12 @@ export default function Login() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    mutate(form, {
-      onSuccess: () => {
-        router.push("/dashboard");
-      },
-    });
+   mutate(form, {
+  onSuccess: () => {
+    console.log("Redirecting...");
+    router.push("/dashboard");
+  },
+});
   };
 
   return (
